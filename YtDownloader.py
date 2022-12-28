@@ -1,6 +1,7 @@
 from pytube import YouTube
 from pytube import Stream
 
+#gui
 ytVideoLink = "https://www.youtube.com/watch?v=0qacFnuXSF8"
 
 def OnProgress(stream:Stream, chunk: bytes, bytes_remaining: int):
