@@ -13,16 +13,16 @@ def OnProgress(stream:Stream, chunk: bytes, bytes_remaining: int):
 def OnDownloadComplete(arg1,arg2):
     print("Video downloaded!")
 
-def DownloadVideo(video_link:str,resolution:str):
+def DownloadVideo():
     try:
-        yt_instance = YouTube(video_link)
+        yt_instance = YouTube(videoLink)
         yt_instance.register_on_progress_callback(OnProgress)
         yt_instance.register_on_complete_callback(OnDownloadComplete)
 
-        ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=resolution).first()
+        ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=selectedResolution).first()
         ytStream.download(output_path="./yt_downloads")
 
-    except: print("Error downloading video")
+    except Exception as e: print("Error:",videoLink,e)
 
 def Init():
     global root 
@@ -39,23 +39,24 @@ def Init():
 
     root.grid_rowconfigure(10, weight=1)
     ttk.Button(root, text="Quit", command=root.destroy).grid(row=10,column=3,sticky="es")
-    #add button when stopped writing and input is a link
     root.mainloop()
 
 selectedResolution = ""
 videoLink = ""
 
 def SelectVideo(selectedVideoLink:str):
-    videoLink = selectedVideoLink
+    global videoLink
+    videoLink = video_link_text.get("1.0",'end-1c')
+    global combobox
     combobox = ttk.Combobox(root,textvariable="360p")
     combobox['values'] = ('144p', '240p', '360p', '480p', '720p', '1080p')
     combobox['state'] = 'readonly'
-    combobox.bind('<<Selected>>', SelectResolution)
+    combobox.bind("<<ComboboxSelected>>", SelectResolution)
     combobox.grid(column=2,row=3)
 
 def SelectResolution(resolution:str):
-    selectedResolution = resolution
-    btnDownload = ttk.Button(root, text="Download", command=DownloadVideo(videoLink,selectedResolution))
+    selectedResolution = combobox.get()
+    btnDownload = ttk.Button(root, text="Download", command=DownloadVideo)
     btnDownload.grid(row=10, column=0,sticky="ws")
 
 Init()
