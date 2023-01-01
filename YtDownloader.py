@@ -3,62 +3,67 @@ from pytube import Stream
 from tkinter import *
 from tkinter import ttk
 
-def OnProgress(stream:Stream, chunk: bytes, bytes_remaining: int):
-    bytes_downloaded = stream.filesize - bytes_remaining
-    percentage_completion = bytes_downloaded/stream.filesize * 100
+class YTDownloader:
     
-    if(bytes_remaining > 0):
-        print("Progress: {0:0.1f}%".format(percentage_completion))
-    
-def OnDownloadComplete(arg1,arg2):
-    print("Video downloaded!")
+    def __init__(self, **kwargs):
+        """ Initializes the downloader with the provided url,resolution and output directory"""
+        self.url = kwargs['url']
+        self.resolution = kwargs['resolution']
+        self.output_dir = kwargs['output_dir']
 
-def DownloadVideo():
-    try:
-        yt_instance = YouTube(videoLink)
-        yt_instance.register_on_progress_callback(OnProgress)
-        yt_instance.register_on_complete_callback(OnDownloadComplete)
+    def DownloadVideo(self):
+        """ Tries downloading video with the initialized parameters. """
+        try:
+            yt_instance = YouTube(self.url)
+            yt_instance.register_on_progress_callback(self.OnProgress)
+            yt_instance.register_on_complete_callback(self.OnDownloadComplete)
 
-        ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=selectedResolution).first()
-        ytStream.download(output_path="./yt_downloads")
+            ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=self.resolution).first()
+            ytStream.download(output_path=self.output_dir)
 
-    except Exception as e: print("Error:",videoLink,e)
+        except Exception as e: print("Error: ",e)
 
-def Init():
-    global root 
-    root = Tk()
-    root.resizable(width=False,height=False)
-    root.title("YouTube Downloader")
-    root.geometry("640x480")
+    def OnProgress(stream, chunk, bytes_remaining):
+        """ This event is fired at the beginning of a successful download 
+            as well as during the whole process """
+        bytes_downloaded = stream.filesize - bytes_remaining
+        percentage_completion = bytes_downloaded/stream.filesize * 100
+        
+        if(bytes_remaining > 0):
+            print("Progress: {0:0.1f}%".format(percentage_completion))
 
-    ttk.Label(root, text="Enter a video link").grid(column=1, row=2,padx=20)
-    global video_link_text
-    video_link_text = Text(root, height=1, width=35)
-    video_link_text.grid(column=1,row=3)
-    video_link_text.bind("<KeyRelease>",SelectVideo)
+    def OnDownloadComplete(arg1,arg2):
+        """ This event is fired when the download is completed"""
+        print("Video downloaded!")
 
-    root.grid_rowconfigure(10, weight=1)
-    ttk.Button(root, text="Quit", command=root.destroy).grid(row=10,column=3,sticky="es")
-    root.mainloop()
+class App:
+    def __init__(self):
+        """ Initializes the GUI for the application"""
+        
+        self.root = Tk()
+        self.root.title("YouTube Downloader")
+        self.root.geometry("640x480")
+        self.root.resizable(False,False)
+        self.root.config(bg="black")
+        self.root.grid_rowconfigure(10, weight=1)
 
-selectedResolution = ""
-videoLink = ""
+        ttk.Label(self.root, text="Enter a video link").grid(column=1, row=2,padx=20)
+        self.video_link_text = Text(self.root, height=1, width=35)
+        self.video_link_text.grid(column=1,row=3)
+        self.video_link_text.bind("<KeyRelease>",self.SelectVideo)
 
-def SelectVideo(selectedVideoLink:str):
-    global videoLink
-    videoLink = video_link_text.get("1.0",'end-1c')
-    global combobox
-    combobox = ttk.Combobox(root,textvariable="360p")
-    combobox['values'] = ('144p', '240p', '360p', '480p', '720p', '1080p')
-    combobox['state'] = 'readonly'
-    combobox.bind("<<ComboboxSelected>>", SelectResolution)
-    combobox.grid(column=2,row=3)
+        ttk.Button(self.root, text="Quit", command=self.root.destroy).grid(row=10,column=3,sticky="es")
+        self.root.mainloop()
 
-def SelectResolution(resolution:str):
-    selectedResolution = combobox.get()
-    btnDownload = ttk.Button(root, text="Download", command=DownloadVideo)
-    btnDownload.grid(row=10, column=0,sticky="ws")
+    def SelectVideo(self):
+        self.videoLink = self.video_link_text.get("1.0",'end-1c')
+        self.combobox = ttk.Combobox(self.root,textvariable="360p")
+        self.combobox['values'] = ('144p', '240p', '360p', '480p', '720p', '1080p')
+        self.combobox['state'] = 'readonly'
+        self.combobox.bind("<<ComboboxSelected>>", self.SelectResolution)
+        self.combobox.grid(column=2,row=3)
 
-Init()
-#ytVideoLink = "https://www.youtube.com/watch?v=0qacFnuXSF8"
-#DownloadVideo(ytVideoLink)
+    def SelectResolution(self):
+        self.selectedResolution = self.combobox.get()
+        btnDownload = ttk.Button(self.root, text="Download", command=self.DownloadVideo)
+        btnDownload.grid(row=10, column=0,sticky="ws")
