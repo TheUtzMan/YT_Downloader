@@ -1,40 +1,6 @@
 from pytube import YouTube
-from pytube import Stream
-from tkinter import *
-from tkinter import ttk
-
-class YTDownloader:
-    
-    def __init__(self, **kwargs):
-        """ Initializes the downloader with the provided url,resolution and output directory"""
-        self.url = kwargs['url']
-        self.resolution = kwargs['resolution']
-        self.output_dir = kwargs['output_dir']
-
-    def DownloadVideo(self):
-        """ Tries downloading video with the initialized parameters. """
-        try:
-            yt_instance = YouTube(self.url)
-            yt_instance.register_on_progress_callback(self.OnProgress)
-            yt_instance.register_on_complete_callback(self.OnDownloadComplete)
-
-            ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=self.resolution).first()
-            ytStream.download(output_path=self.output_dir)
-
-        except Exception as e: print("Error: ",e)
-
-    def OnProgress(stream, chunk, bytes_remaining):
-        """ This event is fired at the beginning of a successful download 
-            as well as during the whole process """
-        bytes_downloaded = stream.filesize - bytes_remaining
-        percentage_completion = bytes_downloaded/stream.filesize * 100
-        
-        if(bytes_remaining > 0):
-            print("Progress: {0:0.1f}%".format(percentage_completion))
-
-    def OnDownloadComplete(arg1,arg2):
-        """ This event is fired when the download is completed"""
-        print("Video downloaded!")
+from tkinter import Tk,Text,ttk
+import json
 
 class App:
     def __init__(self):
@@ -67,3 +33,40 @@ class App:
         self.selectedResolution = self.combobox.get()
         btnDownload = ttk.Button(self.root, text="Download", command=self.DownloadVideo)
         btnDownload.grid(row=10, column=0,sticky="ws")
+
+    class AppSettings:
+        def __init__(self):
+            """ Initializes the GUI for the application settings"""
+            pass
+        
+    class YTDownloader:  
+        def __init__(self, **kwargs):
+            """ Initializes the downloader with the provided url,resolution and output directory"""
+            self.url = kwargs['url']
+            self.resolution = kwargs['resolution']
+            self.output_dir = kwargs['output_dir']
+
+        def DownloadVideo(self):
+            """ Tries downloading video with the initialized parameters. """
+            try:
+                yt_instance = YouTube(self.url)
+                yt_instance.register_on_progress_callback(self.OnProgress)
+                yt_instance.register_on_complete_callback(self.OnDownloadComplete)
+
+                ytStream = yt_instance.streams.filter(file_extension="mp4",resolution=self.resolution).first()
+                ytStream.download(output_path=self.output_dir)
+
+            except Exception as e: print("Error: ",e)
+
+        def OnProgress(stream, chunk, bytes_remaining):
+            """ This event is fired at the beginning of a successful download 
+                as well as during the whole process """
+            bytes_downloaded = stream.filesize - bytes_remaining
+            percentage_completion = bytes_downloaded/stream.filesize * 100
+            
+            if(bytes_remaining > 0):
+                print("Progress: {0:0.1f}%".format(percentage_completion))
+
+        def OnDownloadComplete(arg1,arg2):
+            """ This event is fired when the download is completed"""
+            print("Video downloaded!")
