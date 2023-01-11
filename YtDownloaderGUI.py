@@ -1,4 +1,4 @@
-from tkinter import Tk,Text,ttk
+from tkinter import Tk,Text,ttk,Menu
 from YTDownloader import YTDownloader
 import json
 
@@ -7,26 +7,30 @@ class AppGUI:
     class AppSettings:
         def __init__(self):
             """ Initializes the GUI for the application settings"""
-            self.file_directory = "./settings.json"
+            self.download_directory = "./output"
+            self.read_settings()
             pass
          
         def read_settings(self) :
             try:
-                file = open(self.file_directory)
-                self.file_directory = json.load(file)
-                print("Deserialized: {0}".format(self.file_directory))
-            except FileNotFoundError as e :
-                print("Could not find {0}".format(self.file_directory))
-                self.file_directory = "./settings.json"
-            finally: file.close()   
+                file = open("./settings.json")
+                self.download_directory = json.load(fp=file)
+                print("Deserialized: {0}".format(self.download_directory))
+                file.close()
+            except FileNotFoundError :
+                open("./settings.json","x").close()
+            except json.JSONDecodeError:
+                #delete file
+                pass
 
         def write_settings(self):
             try:
-                file = open(self.file_directory,"w")
-                self.file_directory = json.dump(file,indent=4,separators=(". ","= "))
-                print("Serialized: {0}".format(self.file_directory))
+                file = open("./settings.json","w")
+                json_string = json.dumps(self.download_directory,indent=4,separators=(". ","= "))
+                file.write(json_string)
+                print("Serialized: {0}".format(self.download_directory))
             except Exception as e :
-                print("Could not write to {0}".format(self.file_directory))
+                print("Could not write to settings.json\n{0}".format(e))
             finally: file.close() 
 
     def __init__(self):
@@ -48,11 +52,33 @@ class AppGUI:
             column=2,
             sticky="es"
             )
+
+        menu = Menu(self.root)
+        menu.add_command(label="Preferences",command=self.preferences_window)
+        self.root.config(menu=menu)
+
         self.application_settings = self.AppSettings()
         self.root.mainloop()
 
+    def save_settings(self,arg):
+        self.application_settings.download_directory = self.new_video_dir.get("1.0",'end-1c')
+
+    def preferences_window(self):
+        window = Tk()
+        window.title("Preferences")
+        window.geometry("320x240")
+        window.resizable(False,False)
+        ttk.Label(window, text="Enter a directory for the saved videos").grid(column=1, row=1,padx=20)
+        
+        self.new_video_dir = Text(window, height=1, width=39)
+        self.new_video_dir.grid(column=1,row=2)
+        self.new_video_dir.insert("1.0",self.application_settings.download_directory)
+        self.new_video_dir.bind("<KeyRelease>",self.save_settings)
+        window.mainloop()
+        pass
+
     def quit(self):
-        self.application_settings.edit_settings()
+        self.application_settings.write_settings()
         self.root.destroy()
 
     def select_video(self, video):
@@ -90,7 +116,7 @@ class AppGUI:
             YTDownloader (
                 url = video_link,
                 resolution = selected_resolution, 
-                output_dir = self.application_settings.file_directory,
+                output_dir = self.application_settself.download_directory,
                 progressbar = progressbar
             )
         
