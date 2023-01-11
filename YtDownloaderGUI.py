@@ -3,8 +3,11 @@ from YTDownloader import YTDownloader
 import json
 
 class AppGUI:
-    
+    """Class for working with the application GUI"""
+
     class AppSettings:
+        """Class for working with the application settings"""
+
         def __init__(self):
             """ Initializes the GUI for the application settings"""
             self.download_directory = "./output"
@@ -12,6 +15,7 @@ class AppGUI:
             pass
          
         def read_settings(self) :
+            """ Tries to read the settings of the application"""
             try:
                 file = open("./settings.json")
                 self.download_directory = json.load(fp=file)
@@ -24,6 +28,7 @@ class AppGUI:
                 pass
 
         def write_settings(self):
+            """ Tries to save the settings of the application"""
             try:
                 file = open("./settings.json","w")
                 json_string = json.dumps(self.download_directory,indent=4,separators=(". ","= "))
@@ -61,9 +66,11 @@ class AppGUI:
         self.root.mainloop()
 
     def save_settings(self,arg):
+        """Overrides the settings for this application"""
         self.application_settings.download_directory = self.new_video_dir.get("1.0",'end-1c')
 
     def preferences_window(self):
+        """Create a window for the application settings"""
         window = Tk()
         window.title("Preferences")
         window.geometry("320x240")
@@ -78,10 +85,12 @@ class AppGUI:
         pass
 
     def quit(self):
+        """Tries to save the application settings while quiting the application"""
         self.application_settings.write_settings()
         self.root.destroy()
 
     def select_video(self, video):
+        """Processes the input for the video"""
         global video_link
         video_link = self.video_link_text.get("1.0",'end-1c')
 
@@ -95,6 +104,7 @@ class AppGUI:
             except NameError: pass
 
     def select_resolution(self,arg1):
+        """Processes the input for the resolution of the video"""
         global selected_resolution
         selected_resolution = self.combobox.get()
         global btnDownload
@@ -102,6 +112,7 @@ class AppGUI:
         btnDownload.grid(row=10, column=0,sticky="ws")
 
     def start_download(self):
+        """Tries to download the video with the provided input and filters"""
         btnDownload.grid_forget()
         try:
             progressbar = ttk.Progressbar (
@@ -116,7 +127,7 @@ class AppGUI:
             YTDownloader (
                 url = video_link,
                 resolution = selected_resolution, 
-                output_dir = self.application_settself.download_directory,
+                output_dir = self.application_settings.download_directory,
                 progressbar = progressbar
             )
         
@@ -124,4 +135,5 @@ class AppGUI:
                 global error_label
                 error_label = ttk.Label(self.root, text=e).grid(column=1, row=3)
 
+#Starts the program
 application = AppGUI()

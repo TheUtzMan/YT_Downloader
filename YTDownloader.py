@@ -3,6 +3,7 @@ from tkinter.ttk import Progressbar
 from threading import Thread
 
 class YTDownloader:  
+        """Class for downloading a video with the Pytube API"""
         def __init__(self, **kwargs):
             """ Initializes the downloader with the provided url,resolution and output directory"""
             self.url = kwargs['url']
