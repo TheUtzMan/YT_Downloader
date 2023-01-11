@@ -10,18 +10,24 @@ class AppGUI:
             self.file_directory = "./settings.json"
             pass
          
-        def read_settings(self) -> bool :
-            return False
+        def read_settings(self) :
+            try:
+                file = open(self.file_directory)
+                self.file_directory = json.load(file)
+                print("Deserialized: {0}".format(self.file_directory))
+            except FileNotFoundError as e :
+                print("Could not find {0}".format(self.file_directory))
+                self.file_directory = "./settings.json"
+            finally: file.close()   
 
         def write_settings(self):
-            json.dumps(self.file_directory,obj="Saved settings directory")
-            pass
-        
-        def edit_settings(self):
-            pass
-
-        def create_settings(self):
-            pass
+            try:
+                file = open(self.file_directory,"w")
+                self.file_directory = json.dump(file,indent=4,separators=(". ","= "))
+                print("Serialized: {0}".format(self.file_directory))
+            except Exception as e :
+                print("Could not write to {0}".format(self.file_directory))
+            finally: file.close() 
 
     def __init__(self):
         """ Initializes the GUI for the application"""
@@ -84,7 +90,7 @@ class AppGUI:
             YTDownloader (
                 url = video_link,
                 resolution = selected_resolution, 
-                output_dir = "./videos",
+                output_dir = self.application_settings.file_directory,
                 progressbar = progressbar
             )
         
