@@ -1,5 +1,5 @@
 from pytube import YouTube
-from tkinter.ttk import Progressbar
+from tkinter import ttk
 from threading import Thread
 
 class YTDownloader:  
@@ -9,7 +9,7 @@ class YTDownloader:
             self.url = kwargs['url']
             self.resolution = kwargs['resolution']
             self.output_dir = kwargs['output_dir']
-            self.progressbar:Progressbar = kwargs['progressbar']
+            self.progressbar:ttk.Progressbar = kwargs['progressbar']
             global thread
             thread = Thread(target=self.download_video)
             thread.start()
@@ -25,7 +25,12 @@ class YTDownloader:
                     file_extension="mp4",
                     resolution=self.resolution
                     ).first()
-                    
+                
+                self.title_label = ttk.Label(self.progressbar.master,text=ytStream.title)
+                self.title_label.grid(column = 1, row = 4)
+                self.progressbar.stop()
+                self.progressbar["mode"] = "determinate"
+
                 ytStream.download(output_path=self.output_dir)
 
             except Exception as e: print("Error: ",e)
@@ -37,12 +42,13 @@ class YTDownloader:
             percentage_completion = bytes_downloaded/stream.filesize * 100
             
             if(bytes_remaining > 0):
-                if(self.progressbar["value"]<percentage_completion):
-                    self.progressbar["value"]+=1
-                else:self.progressbar["value"] = (percentage_completion)
+                #self.title_label["text"] = stream.
+                self.progressbar["value"] = (percentage_completion)
                 print(percentage_completion)
 
         def on_download_complete(self,stream,file_path):
             """ This event is fired when the download is completed"""
             self.progressbar["value"]=100
+            self.title_label["text"] = ""
+            self.title_label.grid()
             print("Finished")

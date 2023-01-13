@@ -1,6 +1,6 @@
 from tkinter import Tk,Text,ttk,Menu
 from YTDownloader import YTDownloader
-import json
+import json,os
 
 class AppGUI:
     """Class for working with the application GUI"""
@@ -20,12 +20,12 @@ class AppGUI:
                 file = open("settings.json")
                 self.download_directory = json.load(fp=file)
                 print("Deserialized: {0}".format(self.download_directory))
-                file.close()
             except FileNotFoundError :
-                open("settings.json","x")
+                file = open("settings.json","x")
             except json.JSONDecodeError:
-                #open("settings.json","r")
+                os.remove("settings.json")
                 pass
+            finally: file.close()
 
         def write_settings(self):
             """ Tries to save the settings of the application"""
@@ -122,16 +122,19 @@ class AppGUI:
                 self.root,
                 orient="horizontal",
                 length=300,
-                mode="determinate"
+                mode="indeterminate"
                 )
                 
             progressbar.grid(column=0, row=6, columnspan=3, padx=200, pady=25)
-
+            progressbar.start()
+            label = ttk.Label(self.root,text="Fetching information...")
+            label.grid(column = 1, row = 4)
+            self.combobox.grid_forget()
             YTDownloader (
                 url = video_link,
                 resolution = selected_resolution, 
                 output_dir = self.application_settings.download_directory,
-                progressbar = progressbar
+                progressbar = progressbar,
             )
         
         except Exception as e:
