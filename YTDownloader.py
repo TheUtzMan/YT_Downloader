@@ -37,7 +37,9 @@ class YTDownloader:
             percentage_completion = bytes_downloaded/stream.filesize * 100
             
             if(bytes_remaining > 0):
-                self.progressbar["value"] = (percentage_completion)
+                if(self.progressbar["value"]<percentage_completion):
+                    self.progressbar["value"]+=1
+                else:self.progressbar["value"] = (percentage_completion)
                 print(percentage_completion)
 
         def on_download_complete(self,stream,file_path):

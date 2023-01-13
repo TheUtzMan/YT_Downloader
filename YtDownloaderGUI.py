@@ -10,27 +10,27 @@ class AppGUI:
 
         def __init__(self):
             """ Initializes the GUI for the application settings"""
-            self.download_directory = "./output"
+            self.download_directory = "/output"
             self.read_settings()
             pass
          
         def read_settings(self) :
             """ Tries to read the settings of the application"""
             try:
-                file = open("./settings.json")
+                file = open("settings.json")
                 self.download_directory = json.load(fp=file)
                 print("Deserialized: {0}".format(self.download_directory))
                 file.close()
             except FileNotFoundError :
-                open("./settings.json","x").close()
+                open("settings.json","x")
             except json.JSONDecodeError:
-                #delete file
+                #open("settings.json","r")
                 pass
 
         def write_settings(self):
             """ Tries to save the settings of the application"""
             try:
-                file = open("./settings.json","w")
+                file = open("settings.json","w")
                 json_string = json.dumps(self.download_directory,indent=4,separators=(". ","= "))
                 file.write(json_string)
                 print("Serialized: {0}".format(self.download_directory))
@@ -46,6 +46,9 @@ class AppGUI:
         self.root.geometry("640x480")
         self.root.resizable(False,False)
         self.root.grid_rowconfigure(10, weight=1)
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(5, weight=1)
 
         ttk.Label(self.root, text="Enter a video link").grid(column=1, row=2,padx=20)
         self.video_link_text = Text(self.root, height=1, width=45)
